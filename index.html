@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Compte à rebours Ping Pong</title>
+    <style>
+        /* Le fond façon table de ping pong */
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background-color: #1a6b3c; /* Vert classique d'une table */
+            font-family: 'Courier New', Courier, monospace;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Lignes blanches de la table */
+        body::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background-color: white;
+            z-index: 0;
+        }
+        body::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            width: 4px;
+            height: 100%;
+            background-color: white;
+            z-index: 0;
+        }
+
+        /* Le tableau d'affichage (façon raquette noire et rouge) */
+        .scoreboard {
+            background-color: #212121; /* Revêtement noir */
+            border: 12px solid #d32f2f; /* Revêtement rouge sur les bords */
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.6);
+            text-align: center;
+            z-index: 2;
+        }
+
+        h1 {
+            margin-top: 0;
+            font-size: 2rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .countdown {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-top: 30px;
+        }
+
+        .time-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Les chiffres du compte à rebours */
+        .number {
+            font-size: 4rem;
+            font-weight: bold;
+            background-color: #111;
+            padding: 15px 25px;
+            border-radius: 10px;
+            color: #ffa500; /* Couleur d'une balle de ping pong orange */
+            min-width: 90px;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.8);
+        }
+
+        .label {
+            margin-top: 10px;
+            font-size: 1rem;
+            text-transform: uppercase;
+            color: #ccc;
+        }
+
+        /* Balle de ping pong décorative animée */
+        .ball {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            background-color: #ffa500; /* Orange balle 3 étoiles */
+            border-radius: 50%;
+            box-shadow: inset -5px -5px 15px rgba(0,0,0,0.3), 5px 5px 10px rgba(0,0,0,0.4);
+            animation: pingpong 3s infinite linear alternate;
+            z-index: 1;
+        }
+
+        @keyframes pingpong {
+            0% { top: 10%; left: 10%; transform: scale(1); }
+            50% { top: 40%; left: 50%; transform: scale(1.5); }
+            100% { top: 80%; left: 90%; transform: scale(1); }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Animation de la balle -->
+    <div class="ball"></div>
+
+    <!-- Interface principale -->
+    <div class="scoreboard">
+        <h1>Prochain match à 16h30</h1>
+        <div class="countdown">
+            <div class="time-box">
+                <span class="number" id="hours">00</span>
+                <span class="label">Heures</span>
+            </div>
+            <div class="time-box">
+                <span class="number" id="minutes">00</span>
+                <span class="label">Minutes</span>
+            </div>
+            <div class="time-box">
+                <span class="number" id="seconds">00</span>
+                <span class="label">Secondes</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Script du compte à rebours -->
+    <script>
+        function updateCountdown() {
+            const now = new Date();
+            
+            // Définir la cible à 16h30 pour la journée en cours
+            let target = new Date();
+            target.setHours(16, 30, 0, 0);
+
+            // Si 16h30 est déjà passé aujourd'hui, on décale l'objectif à demain
+            if (now > target) {
+                target.setDate(target.getDate() + 1);
+            }
+
+            const diff = target - now;
+
+            // Calcul du temps restant
+            const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            const s = Math.floor((diff % (1000 * 60)) / 1000);
+
+            // Affichage dans le HTML avec un '0' devant si < 10 (ex: 09 au lieu de 9)
+            document.getElementById('hours').innerText = h.toString().padStart(2, '0');
+            document.getElementById('minutes').innerText = m.toString().padStart(2, '0');
+            document.getElementById('seconds').innerText = s.toString().padStart(2, '0');
+        }
+
+        // Lancer la mise à jour toutes les 1000 ms (1 seconde)
+        setInterval(updateCountdown, 1000);
+        
+        // Exécuter immédiatement pour ne pas attendre 1 seconde au chargement
+        updateCountdown();
+    </script>
+</body>
+</html>
