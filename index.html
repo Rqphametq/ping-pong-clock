@@ -4,8 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Compte à rebours Ping Pong</title>
+    <!-- Importation de polices Google (une pour le texte, une pour l'affichage digital) -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;800&family=Share+Tech+Mono&display=swap" rel="stylesheet">
     <style>
-        /* Le fond façon table de ping pong */
+        /* Fond de la table de ping-pong amélioré */
         body {
             margin: 0;
             padding: 0;
@@ -14,8 +16,8 @@
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            background-color: #1a6b3c; /* Vert classique d'une table */
-            font-family: 'Courier New', Courier, monospace;
+            background: radial-gradient(circle, #278148 0%, #154526 100%);
+            font-family: 'Montserrat', sans-serif;
             color: white;
             position: relative;
             overflow: hidden;
@@ -28,8 +30,9 @@
             top: 50%;
             left: 0;
             width: 100%;
-            height: 4px;
-            background-color: white;
+            height: 6px;
+            background-color: rgba(255, 255, 255, 0.8);
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
             z-index: 0;
         }
         body::after {
@@ -37,36 +40,78 @@
             position: absolute;
             top: 0;
             left: 50%;
-            width: 4px;
+            width: 6px;
             height: 100%;
-            background-color: white;
+            background-color: rgba(255, 255, 255, 0.8);
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
             z-index: 0;
         }
 
-        /* Le tableau d'affichage (façon raquette noire et rouge) */
+        /* Le filet de ping-pong au centre */
+        .net {
+            position: absolute;
+            top: 50%;
+            left: 0;
+            width: 100%;
+            height: 25px;
+            background: repeating-linear-gradient(
+                45deg,
+                transparent,
+                transparent 4px,
+                rgba(255, 255, 255, 0.3) 4px,
+                rgba(255, 255, 255, 0.3) 6px
+            ),
+            repeating-linear-gradient(
+                -45deg,
+                transparent,
+                transparent 4px,
+                rgba(255, 255, 255, 0.3) 4px,
+                rgba(255, 255, 255, 0.3) 6px
+            );
+            border-top: 4px solid white;
+            transform: translateY(-50%);
+            z-index: 1;
+            box-shadow: 0 10px 15px rgba(0,0,0,0.3);
+        }
+
+        /* Conteneur principal par-dessus la table */
+        .content-wrapper {
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 30px;
+            width: 100%;
+            max-width: 600px;
+            padding: 20px;
+        }
+
+        /* Le tableau d'affichage */
         .scoreboard {
-            background-color: #212121; /* Revêtement noir */
-            border: 12px solid #d32f2f; /* Revêtement rouge sur les bords */
-            border-radius: 20px;
-            padding: 40px;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.6);
+            background: linear-gradient(145deg, #1a1a1a, #2a2a2a);
+            border: 8px solid #d32f2f; /* Bordure rouge raquette */
+            border-radius: 15px;
+            padding: 30px 40px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.7), inset 0 0 20px rgba(0,0,0,0.5);
             text-align: center;
-            z-index: 2;
+            width: 100%;
+            box-sizing: border-box;
         }
 
         h1 {
             margin-top: 0;
-            font-size: 2rem;
+            font-size: 1.8rem;
             text-transform: uppercase;
-            letter-spacing: 2px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            letter-spacing: 1px;
+            color: #eee;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
         }
 
         .countdown {
             display: flex;
-            gap: 20px;
+            gap: 15px;
             justify-content: center;
-            margin-top: 30px;
+            margin-top: 20px;
         }
 
         .time-box {
@@ -75,100 +120,244 @@
             align-items: center;
         }
 
-        /* Les chiffres du compte à rebours */
+        /* Les chiffres digitaux */
         .number {
-            font-size: 4rem;
-            font-weight: bold;
-            background-color: #111;
-            padding: 15px 25px;
-            border-radius: 10px;
-            color: #ffa500; /* Couleur d'une balle de ping pong orange */
-            min-width: 90px;
-            box-shadow: inset 0 0 10px rgba(0,0,0,0.8);
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 4.5rem;
+            background-color: #050505;
+            padding: 15px 20px;
+            border-radius: 8px;
+            color: #ff9800; /* Orange balle de ping pong */
+            min-width: 80px;
+            box-shadow: inset 0 0 15px rgba(255, 152, 0, 0.1), 0 2px 0 rgba(255,255,255,0.1);
+            border: 1px solid #333;
+            text-shadow: 0 0 10px rgba(255, 152, 0, 0.5);
         }
 
         .label {
-            margin-top: 10px;
-            font-size: 1rem;
+            margin-top: 8px;
+            font-size: 0.85rem;
             text-transform: uppercase;
-            color: #ccc;
+            color: #888;
+            font-weight: 800;
         }
 
-        /* Balle de ping pong décorative animée */
+        /* Section Question */
+        .question-section {
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(5px);
+            padding: 25px;
+            border-radius: 15px;
+            text-align: center;
+            width: 100%;
+            box-sizing: border-box;
+            border: 1px solid rgba(255,255,255,0.1);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.5);
+            transition: all 0.3s ease;
+        }
+
+        .question-section h2 {
+            margin: 0 0 20px 0;
+            font-size: 1.5rem;
+        }
+
+        .buttons-container {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        /* Boutons stylisés (faces de raquette) */
+        .btn {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 1.2rem;
+            font-weight: 800;
+            padding: 15px 40px;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            text-transform: uppercase;
+            color: white;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 8px 15px rgba(0,0,0,0.3);
+        }
+
+        .btn-oui {
+            background-color: #d32f2f; /* Face rouge */
+            border-bottom: 5px solid #9a0007;
+        }
+
+        .btn-oui:hover {
+            transform: translateY(3px);
+            border-bottom: 2px solid #9a0007;
+            background-color: #e53935;
+        }
+
+        .btn-non {
+            background-color: #212121; /* Face noire */
+            border-bottom: 5px solid #000000;
+            /* Transition pour que la fuite du bouton soit fluide */
+            transition: all 0.15s ease-out; 
+            z-index: 100;
+        }
+
+        /* Message final */
+        .success-message {
+            font-size: 1.4rem;
+            line-height: 1.5;
+            color: #4caf50;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+            font-weight: 800;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        /* Balle de ping pong améliorée */
+        .ball-container {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+            z-index: 5;
+        }
+
         .ball {
             position: absolute;
-            width: 40px;
-            height: 40px;
-            background-color: #ffa500; /* Orange balle 3 étoiles */
+            width: 30px;
+            height: 30px;
+            background: radial-gradient(circle at 10px 10px, #ffb74d, #f57c00);
             border-radius: 50%;
-            box-shadow: inset -5px -5px 15px rgba(0,0,0,0.3), 5px 5px 10px rgba(0,0,0,0.4);
-            animation: pingpong 3s infinite linear alternate;
-            z-index: 1;
+            box-shadow: inset -3px -3px 10px rgba(0,0,0,0.3);
+            animation: bounce 2s infinite cubic-bezier(0.5, 0.05, 1, 0.5) alternate, moveX 4s infinite linear alternate;
         }
 
-        @keyframes pingpong {
-            0% { top: 10%; left: 10%; transform: scale(1); }
-            50% { top: 40%; left: 50%; transform: scale(1.5); }
-            100% { top: 80%; left: 90%; transform: scale(1); }
+        .ball-shadow {
+            position: absolute;
+            width: 30px;
+            height: 10px;
+            background: rgba(0,0,0,0.4);
+            border-radius: 50%;
+            filter: blur(4px);
+            animation: shadowScale 2s infinite cubic-bezier(0.5, 0.05, 1, 0.5) alternate, moveX 4s infinite linear alternate;
+            margin-top: 45px;
+        }
+
+        @keyframes bounce {
+            0% { top: 10%; transform: scale(1.1); }
+            100% { top: 70%; transform: scale(0.9); }
+        }
+        @keyframes shadowScale {
+            0% { top: 10%; transform: scale(0.2); opacity: 0.1; }
+            100% { top: 70%; transform: scale(1.5); opacity: 0.6; }
+        }
+        @keyframes moveX {
+            0% { left: 10%; }
+            100% { left: 90%; }
         }
     </style>
 </head>
 <body>
 
-    <!-- Animation de la balle -->
-    <div class="ball"></div>
-
-    <!-- Interface principale -->
-    <div class="scoreboard">
-        <h1>Prochain match à 16h30</h1>
-        <div class="countdown">
-            <div class="time-box">
-                <span class="number" id="hours">00</span>
-                <span class="label">Heures</span>
-            </div>
-            <div class="time-box">
-                <span class="number" id="minutes">00</span>
-                <span class="label">Minutes</span>
-            </div>
-            <div class="time-box">
-                <span class="number" id="seconds">00</span>
-                <span class="label">Secondes</span>
-            </div>
-        </div>
+    <!-- Décorations de la table -->
+    <div class="net"></div>
+    
+    <div class="ball-container">
+        <div class="ball-shadow"></div>
+        <div class="ball"></div>
     </div>
 
-    <!-- Script du compte à rebours -->
+    <!-- Interface -->
+    <div class="content-wrapper">
+        
+        <!-- Scoreboard / Compte à rebours -->
+        <div class="scoreboard">
+            <h1>Prochain match à 16h30</h1>
+            <div class="countdown">
+                <div class="time-box">
+                    <span class="number" id="hours">00</span>
+                    <span class="label">Heures</span>
+                </div>
+                <div class="time-box">
+                    <span class="number" id="minutes">00</span>
+                    <span class="label">Minutes</span>
+                </div>
+                <div class="time-box">
+                    <span class="number" id="seconds">00</span>
+                    <span class="label">Secondes</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section interactive -->
+        <div class="question-section" id="interactive-section">
+            <h2 id="question-text">Est-ce que tu as hâte ?</h2>
+            <div class="buttons-container" id="buttons-container">
+                <button id="btn-oui" class="btn btn-oui">Oui</button>
+                <button id="btn-non" class="btn btn-non">Non</button>
+            </div>
+        </div>
+
+    </div>
+
     <script>
+        // --- LOGIQUE DU COMPTE À REBOURS ---
         function updateCountdown() {
             const now = new Date();
-            
-            // Définir la cible à 16h30 pour la journée en cours
             let target = new Date();
             target.setHours(16, 30, 0, 0);
 
-            // Si 16h30 est déjà passé aujourd'hui, on décale l'objectif à demain
             if (now > target) {
                 target.setDate(target.getDate() + 1);
             }
 
             const diff = target - now;
-
-            // Calcul du temps restant
             const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
             const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
             const s = Math.floor((diff % (1000 * 60)) / 1000);
 
-            // Affichage dans le HTML avec un '0' devant si < 10 (ex: 09 au lieu de 9)
             document.getElementById('hours').innerText = h.toString().padStart(2, '0');
             document.getElementById('minutes').innerText = m.toString().padStart(2, '0');
             document.getElementById('seconds').innerText = s.toString().padStart(2, '0');
         }
 
-        // Lancer la mise à jour toutes les 1000 ms (1 seconde)
         setInterval(updateCountdown, 1000);
-        
-        // Exécuter immédiatement pour ne pas attendre 1 seconde au chargement
         updateCountdown();
+
+        // --- LOGIQUE DE LA SECTION INTERACTIVE ---
+        const btnOui = document.getElementById('btn-oui');
+        const btnNon = document.getElementById('btn-non');
+        const interactiveSection = document.getElementById('interactive-section');
+
+        // Événement pour le bouton "Oui"
+        btnOui.addEventListener('click', () => {
+            interactiveSection.innerHTML = '<div class="success-message">Moi aussi ! J\'espère surtout avoir une raquette et ne pas jouer à la main... 🏓</div>';
+        });
+
+        // Comportement fuyant du bouton "Non"
+        btnNon.addEventListener('mouseover', function() {
+            // Dès qu'on passe la souris dessus, on le sort du flux normal pour pouvoir le placer n'importe où
+            this.style.position = 'fixed';
+            
+            // Calculer des coordonnées aléatoires en gardant le bouton dans la fenêtre
+            const windowWidth = window.innerWidth;
+            const windowHeight = window.innerHeight;
+            
+            const btnWidth = this.offsetWidth;
+            const btnHeight = this.offsetHeight;
+
+            // Math.random() génère un nombre entre 0 et 1
+            const randomX = Math.random() * (windowWidth - btnWidth);
+            const randomY = Math.random() * (windowHeight - btnHeight);
+
+            this.style.left = `${randomX}px`;
+            this.style.top = `${randomY}px`;
+        });
     </script>
 </body>
 </html>
