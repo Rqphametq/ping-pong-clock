@@ -4,10 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Compte à rebours Ping Pong</title>
-    <!-- Importation de polices Google -->
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;800&family=Share+Tech+Mono&display=swap" rel="stylesheet">
     <style>
-        /* Fond de la table de ping-pong amélioré */
+        /* --- STYLES GLOBAUX --- */
         body {
             margin: 0;
             padding: 0;
@@ -23,58 +22,28 @@
             overflow: hidden;
         }
 
-        /* Lignes blanches de la table */
-        body::before {
+        /* Lignes décoratives du fond */
+        .bg-lines::before, .bg-lines::after {
             content: '';
             position: absolute;
-            top: 50%;
-            left: 0;
-            width: 100%;
-            height: 6px;
             background-color: rgba(255, 255, 255, 0.8);
             box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
             z-index: 0;
         }
-        body::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 50%;
-            width: 6px;
-            height: 100%;
-            background-color: rgba(255, 255, 255, 0.8);
-            box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
-            z-index: 0;
-        }
+        .bg-lines::before { top: 50%; left: 0; width: 100%; height: 6px; }
+        .bg-lines::after { top: 0; left: 50%; width: 6px; height: 100%; }
 
-        /* Le filet de ping-pong au centre */
         .net {
             position: absolute;
-            top: 50%;
-            left: 0;
-            width: 100%;
-            height: 25px;
-            background: repeating-linear-gradient(
-                45deg,
-                transparent,
-                transparent 4px,
-                rgba(255, 255, 255, 0.3) 4px,
-                rgba(255, 255, 255, 0.3) 6px
-            ),
-            repeating-linear-gradient(
-                -45deg,
-                transparent,
-                transparent 4px,
-                rgba(255, 255, 255, 0.3) 4px,
-                rgba(255, 255, 255, 0.3) 6px
-            );
+            top: 50%; left: 0; width: 100%; height: 25px;
+            background: repeating-linear-gradient(45deg, transparent, transparent 4px, rgba(255, 255, 255, 0.3) 4px, rgba(255, 255, 255, 0.3) 6px),
+                        repeating-linear-gradient(-45deg, transparent, transparent 4px, rgba(255, 255, 255, 0.3) 4px, rgba(255, 255, 255, 0.3) 6px);
             border-top: 4px solid white;
             transform: translateY(-50%);
             z-index: 1;
-            box-shadow: 0 10px 15px rgba(0,0,0,0.3);
         }
 
-        /* Conteneur principal par-dessus la table */
+        /* --- CONTENEUR PRINCIPAL --- */
         .content-wrapper {
             z-index: 10;
             display: flex;
@@ -86,237 +55,123 @@
             padding: 20px;
         }
 
-        /* Le tableau d'affichage */
+        /* Scoreboard */
         .scoreboard {
             background: linear-gradient(145deg, #1a1a1a, #2a2a2a);
             border: 8px solid #d32f2f;
             border-radius: 15px;
             padding: 30px 40px;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.7), inset 0 0 20px rgba(0,0,0,0.5);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.7);
             text-align: center;
             width: 100%;
             box-sizing: border-box;
         }
 
-        h1 {
-            margin-top: 0;
-            font-size: 1.8rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: #eee;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
-        }
+        h1 { margin-top: 0; font-size: 1.8rem; text-transform: uppercase; letter-spacing: 1px; }
 
-        .countdown {
-            display: flex;
-            gap: 15px;
-            justify-content: center;
-            margin-top: 20px;
-        }
+        .countdown { display: flex; gap: 15px; justify-content: center; margin-top: 20px; }
+        .time-box { display: flex; flex-direction: column; align-items: center; }
 
-        .time-box {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        /* Les chiffres digitaux */
         .number {
             font-family: 'Share Tech Mono', monospace;
-            font-size: 4.5rem;
-            background-color: #050505;
-            padding: 15px 20px;
-            border-radius: 8px;
-            color: #ff9800;
-            min-width: 80px;
-            box-shadow: inset 0 0 15px rgba(255, 152, 0, 0.1), 0 2px 0 rgba(255,255,255,0.1);
-            border: 1px solid #333;
-            text-shadow: 0 0 10px rgba(255, 152, 0, 0.5);
+            font-size: 4.5rem; background-color: #050505; padding: 15px 20px;
+            border-radius: 8px; color: #ff9800; min-width: 80px;
+            border: 1px solid #333; text-shadow: 0 0 10px rgba(255, 152, 0, 0.5);
         }
+        .label { margin-top: 8px; font-size: 0.85rem; text-transform: uppercase; color: #888; font-weight: 800; }
 
-        .label {
-            margin-top: 8px;
-            font-size: 0.85rem;
-            text-transform: uppercase;
-            color: #888;
-            font-weight: 800;
-        }
-
-        /* Section Question */
+        /* Section Interactive */
         .question-section {
-            background: rgba(0, 0, 0, 0.6);
-            backdrop-filter: blur(5px);
-            padding: 25px;
-            border-radius: 15px;
-            text-align: center;
-            width: 100%;
-            box-sizing: border-box;
-            border: 1px solid rgba(255,255,255,0.1);
+            background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(5px);
+            padding: 25px; border-radius: 15px; text-align: center;
+            width: 100%; box-sizing: border-box; border: 1px solid rgba(255,255,255,0.1);
             box-shadow: 0 15px 30px rgba(0,0,0,0.5);
-            transition: all 0.3s ease;
         }
 
-        .question-section h2 {
-            margin: 0 0 20px 0;
-            font-size: 1.5rem;
-        }
+        .buttons-container { display: flex; justify-content: center; gap: 20px; position: relative; margin-bottom: 25px; }
 
-        .buttons-container {
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-            position: relative;
-        }
-
-        /* Boutons stylisés */
+        /* Boutons */
         .btn {
-            font-family: 'Montserrat', sans-serif;
-            font-size: 1.2rem;
-            font-weight: 800;
-            padding: 15px 40px;
-            border: none;
-            border-radius: 50px;
-            cursor: pointer;
-            text-transform: uppercase;
-            color: white;
-            box-shadow: 0 8px 15px rgba(0,0,0,0.3);
-            position: relative; /* Nécessaire pour garder sa place dans la structure */
+            font-family: 'Montserrat', sans-serif; font-size: 1.2rem; font-weight: 800;
+            padding: 15px 40px; border: none; border-radius: 50px; cursor: pointer;
+            text-transform: uppercase; color: white; position: relative;
+        }
+        .btn-oui { background-color: #d32f2f; border-bottom: 5px solid #9a0007; transition: transform 0.2s, background-color 0.2s; }
+        .btn-oui:hover { transform: translateY(3px); border-bottom: 2px solid #9a0007; background-color: #e53935; }
+        
+        .btn-non { background-color: #212121; border-bottom: 5px solid #000000; transition: transform 0.1s linear; z-index: 100; }
+        
+        .btn-train { background-color: #1976D2; border-bottom: 5px solid #115293; font-size: 1rem; padding: 12px 30px; transition: 0.2s; }
+        .btn-train:hover { transform: translateY(3px); border-bottom: 2px solid #115293; background-color: #2196F3; }
+
+        .success-message { font-size: 1.4rem; color: #4caf50; font-weight: 800; }
+
+        /* --- CONTENEUR DU MINI JEU --- */
+        #game-wrapper {
+            display: none; /* Caché par défaut */
+            flex-direction: column;
+            align-items: center;
+            z-index: 20;
         }
 
-        .btn-oui {
-            background-color: #d32f2f;
-            border-bottom: 5px solid #9a0007;
-            transition: transform 0.2s, box-shadow 0.2s, background-color 0.2s;
+        canvas {
+            background-color: #1a6b3c; /* Vert table */
+            border: 6px solid white; /* Ligne blanche du bord */
+            border-radius: 5px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+            cursor: none; /* Cache la souris au dessus du jeu */
+            margin-bottom: 20px;
         }
 
-        .btn-oui:hover {
-            transform: translateY(3px);
-            border-bottom: 2px solid #9a0007;
-            background-color: #e53935;
-        }
+        .btn-retour { background-color: #555; border-bottom: 5px solid #333; }
+        .btn-retour:hover { transform: translateY(3px); border-bottom: 2px solid #333; }
 
-        .btn-non {
-            background-color: #212121;
-            border-bottom: 5px solid #000000;
-            /* Une transition fluide sur le "transform" donne l'effet de glissement/fuite */
-            transition: transform 0.1s linear; 
-            z-index: 100;
-        }
-
-        /* Message final */
-        .success-message {
-            font-size: 1.4rem;
-            line-height: 1.5;
-            color: #4caf50;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.8);
-            font-weight: 800;
-            animation: fadeIn 0.5s ease-in;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: scale(0.9); }
-            to { opacity: 1; transform: scale(1); }
-        }
-
-        /* Balle de ping pong animée */
-        .ball-container {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            top: 0;
-            left: 0;
-            pointer-events: none;
-            z-index: 5;
-        }
-
-        .ball {
-            position: absolute;
-            width: 30px;
-            height: 30px;
-            background: radial-gradient(circle at 10px 10px, #ffb74d, #f57c00);
-            border-radius: 50%;
-            box-shadow: inset -3px -3px 10px rgba(0,0,0,0.3);
-            animation: bounce 2s infinite cubic-bezier(0.5, 0.05, 1, 0.5) alternate, moveX 4s infinite linear alternate;
-        }
-
-        .ball-shadow {
-            position: absolute;
-            width: 30px;
-            height: 10px;
-            background: rgba(0,0,0,0.4);
-            border-radius: 50%;
-            filter: blur(4px);
-            animation: shadowScale 2s infinite cubic-bezier(0.5, 0.05, 1, 0.5) alternate, moveX 4s infinite linear alternate;
-            margin-top: 45px;
-        }
-
-        @keyframes bounce {
-            0% { top: 10%; transform: scale(1.1); }
-            100% { top: 70%; transform: scale(0.9); }
-        }
-        @keyframes shadowScale {
-            0% { top: 10%; transform: scale(0.2); opacity: 0.1; }
-            100% { top: 70%; transform: scale(1.5); opacity: 0.6; }
-        }
-        @keyframes moveX {
-            0% { left: 10%; }
-            100% { left: 90%; }
-        }
     </style>
 </head>
 <body>
 
-    <!-- Décorations de la table -->
+    <!-- Décors d'arrière-plan -->
+    <div class="bg-lines"></div>
     <div class="net"></div>
-    
-    <div class="ball-container">
-        <div class="ball-shadow"></div>
-        <div class="ball"></div>
-    </div>
 
-    <!-- Interface -->
-    <div class="content-wrapper">
-        
-        <!-- Scoreboard / Compte à rebours -->
+    <!-- ÉCRAN PRINCIPAL (COMPTE À REBOURS) -->
+    <div class="content-wrapper" id="content-wrapper">
         <div class="scoreboard">
             <h1>Prochain match à 16h30</h1>
             <div class="countdown">
-                <div class="time-box">
-                    <span class="number" id="hours">00</span>
-                    <span class="label">Heures</span>
-                </div>
-                <div class="time-box">
-                    <span class="number" id="minutes">00</span>
-                    <span class="label">Minutes</span>
-                </div>
-                <div class="time-box">
-                    <span class="number" id="seconds">00</span>
-                    <span class="label">Secondes</span>
-                </div>
+                <div class="time-box"><span class="number" id="hours">00</span><span class="label">Heures</span></div>
+                <div class="time-box"><span class="number" id="minutes">00</span><span class="label">Minutes</span></div>
+                <div class="time-box"><span class="number" id="seconds">00</span><span class="label">Secondes</span></div>
             </div>
         </div>
 
-        <!-- Section interactive -->
         <div class="question-section" id="interactive-section">
             <h2 id="question-text">Est-ce que tu as hâte ?</h2>
             <div class="buttons-container" id="buttons-container">
                 <button id="btn-oui" class="btn btn-oui">Oui</button>
                 <button id="btn-non" class="btn btn-non">Non</button>
             </div>
+            <!-- Nouveau bouton pour s'entraîner -->
+            <button id="btn-train" class="btn btn-train">Je veux m'entraîner</button>
         </div>
+    </div>
 
+    <!-- ÉCRAN DU JEU -->
+    <div id="game-wrapper">
+        <!-- Le canvas est notre zone de dessin pour le jeu -->
+        <canvas id="pongCanvas" width="400" height="500"></canvas>
+        <button id="btn-retour" class="btn btn-retour">Retour au chrono</button>
     </div>
 
     <script>
-        // --- LOGIQUE DU COMPTE À REBOURS ---
+        // ==========================================
+        // 1. LOGIQUE DU COMPTE À REBOURS
+        // ==========================================
         function updateCountdown() {
             const now = new Date();
             let target = new Date();
             target.setHours(16, 30, 0, 0);
-
-            if (now > target) {
-                target.setDate(target.getDate() + 1);
-            }
+            if (now > target) target.setDate(target.getDate() + 1);
 
             const diff = target - now;
             const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
@@ -327,58 +182,231 @@
             document.getElementById('minutes').innerText = m.toString().padStart(2, '0');
             document.getElementById('seconds').innerText = s.toString().padStart(2, '0');
         }
-
         setInterval(updateCountdown, 1000);
         updateCountdown();
 
-        // --- LOGIQUE DE LA SECTION INTERACTIVE ---
+        // ==========================================
+        // 2. LOGIQUE DU BOUTON FUYANT (AIMANT INVERSÉ)
+        // ==========================================
         const btnOui = document.getElementById('btn-oui');
         const btnNon = document.getElementById('btn-non');
         const interactiveSection = document.getElementById('interactive-section');
 
-        // Événement pour le bouton "Oui"
         btnOui.addEventListener('click', () => {
             interactiveSection.innerHTML = '<div class="success-message">Moi aussi ! J\'espère surtout avoir une raquette et ne pas jouer à la main... 🏓</div>';
         });
 
-        // Variables pour mémoriser le déplacement total du bouton Non
         let currentTranslateX = 0;
         let currentTranslateY = 0;
 
-        // Comportement "Aimant inversé" du bouton Non
         document.addEventListener('mousemove', (e) => {
-            // Si la section a été remplacée (le bouton oui a été cliqué), on arrête l'animation
-            if (!document.getElementById('btn-non')) return;
+            if (!document.getElementById('btn-non')) return; // Si cliqué sur oui, on arrête
+            
+            // On s'assure qu'on est sur l'écran d'accueil
+            if(document.getElementById('content-wrapper').style.display === 'none') return;
 
-            // Récupérer la position exacte du bouton à l'écran
             const rect = btnNon.getBoundingClientRect();
             const btnCenterX = rect.left + rect.width / 2;
             const btnCenterY = rect.top + rect.height / 2;
 
-            // Calculer la distance entre la souris et le centre du bouton
             const distanceX = e.clientX - btnCenterX;
             const distanceY = e.clientY - btnCenterY;
             const distance = Math.sqrt(distanceX * distanceX + distanceY * distanceY);
 
-            // Distance minimale à partir de laquelle le bouton commence à fuir (rayon en pixels)
-            const dangerZone = 120;
+            const dangerZone = 120; // Zone de détection
 
             if (distance < dangerZone) {
-                // On calcule le vecteur de fuite (direction opposée à la souris)
                 const escapeX = (distanceX / distance) * -1;
                 const escapeY = (distanceY / distance) * -1;
+                const speed = (dangerZone - distance) * 0.4;
 
-                // Plus la souris est proche, plus le bouton fuit vite
-                const speed = (dangerZone - distance) * 0.5;
-
-                // On accumule la position de fuite
                 currentTranslateX += escapeX * speed;
                 currentTranslateY += escapeY * speed;
 
-                // On applique le déplacement en CSS via transform: translate
                 btnNon.style.transform = `translate(${currentTranslateX}px, ${currentTranslateY}px)`;
             }
         });
+
+        // ==========================================
+        // 3. LOGIQUE DU MINI-JEU PING PONG
+        // ==========================================
+        const contentWrapper = document.getElementById('content-wrapper');
+        const gameWrapper = document.getElementById('game-wrapper');
+        const btnTrain = document.getElementById('btn-train');
+        const btnRetour = document.getElementById('btn-retour');
+
+        // Navigation entre les écrans
+        btnTrain.addEventListener('click', () => {
+            contentWrapper.style.display = 'none';
+            document.querySelector('.bg-lines').style.display = 'none';
+            document.querySelector('.net').style.display = 'none';
+            gameWrapper.style.display = 'flex';
+        });
+
+        btnRetour.addEventListener('click', () => {
+            gameWrapper.style.display = 'none';
+            contentWrapper.style.display = 'flex';
+            document.querySelector('.bg-lines').style.display = 'block';
+            document.querySelector('.net').style.display = 'block';
+            gameState = 'START'; // Reset le jeu
+        });
+
+        // --- MOTEUR DU JEU ---
+        const canvas = document.getElementById("pongCanvas");
+        const ctx = canvas.getContext("2d");
+
+        // Objets du jeu
+        const player = { x: canvas.width/2 - 40, y: canvas.height - 30, width: 80, height: 12, color: "#d32f2f", score: 0 };
+        const bot = { x: canvas.width/2 - 40, y: 18, width: 80, height: 12, color: "#212121", score: 0 };
+        const ball = { x: canvas.width/2, y: canvas.height/2, radius: 8, speed: 5, vx: 0, vy: 0, color: "#ffb74d" };
+
+        let gameState = 'START'; // États : START, PLAYING
+
+        // Contrôle du joueur avec la souris (axe horizontal uniquement)
+        canvas.addEventListener('mousemove', (e) => {
+            let rect = canvas.getBoundingClientRect();
+            // Centre la raquette sur la souris
+            player.x = e.clientX - rect.left - player.width/2;
+            
+            // Empêche la raquette de sortir du terrain
+            if(player.x < 0) player.x = 0;
+            if(player.x + player.width > canvas.width) player.x = canvas.width - player.width;
+        });
+
+        // Appuyer sur Espace pour lancer la balle
+        window.addEventListener('keydown', (e) => {
+            if(e.code === 'Space' && gameState === 'START' && gameWrapper.style.display === 'flex') {
+                gameState = 'PLAYING';
+                ball.x = canvas.width/2;
+                ball.y = canvas.height/2;
+                ball.vy = 5; // La balle part vers le joueur
+                ball.vx = (Math.random() > 0.5 ? 1 : -1) * 3; // Direction aléatoire X
+            }
+        });
+
+        // Réinitialiser la balle après un point
+        function resetBall() {
+            ball.x = canvas.width/2;
+            ball.y = canvas.height/2;
+            ball.vx = 0;
+            ball.vy = 0;
+            gameState = 'START';
+        }
+
+        // Boucle principale du jeu
+        function updateGame() {
+            if(gameState === 'PLAYING') {
+                // Déplacer la balle
+                ball.x += ball.vx;
+                ball.y += ball.vy;
+
+                // Rebond sur les murs (gauche/droite)
+                if(ball.x - ball.radius < 0 || ball.x + ball.radius > canvas.width) {
+                    ball.vx = -ball.vx;
+                }
+
+                // Intelligence Artificielle du Bot (suit la balle mais avec une vitesse max)
+                let botCenter = bot.x + bot.width/2;
+                let botSpeed = 4; // Vitesse du bot (plus c'est bas, plus c'est facile)
+                if(botCenter < ball.x - 10) bot.x += botSpeed;
+                else if(botCenter > ball.x + 10) bot.x -= botSpeed;
+                
+                // Limite du Bot sur les bords
+                if(bot.x < 0) bot.x = 0;
+                if(bot.x + bot.width > canvas.width) bot.x = canvas.width - bot.width;
+
+                // Détection de collision (Raquette Joueur)
+                if(ball.y + ball.radius > player.y && ball.y - ball.radius < player.y + player.height && ball.x > player.x && ball.x < player.x + player.width) {
+                    ball.vy = -ball.vy;
+                    // Calcule l'angle selon où la balle tape sur la raquette (centre = droit, bord = angle fort)
+                    let hitPoint = ball.x - (player.x + player.width/2);
+                    hitPoint = hitPoint / (player.width/2);
+                    ball.vx = hitPoint * 5; 
+                    ball.y = player.y - ball.radius; // Empêche la balle de rester coincée dans la raquette
+                }
+
+                // Détection de collision (Raquette Bot)
+                if(ball.y - ball.radius < bot.y + bot.height && ball.y + ball.radius > bot.y && ball.x > bot.x && ball.x < bot.x + bot.width) {
+                    ball.vy = -ball.vy;
+                    let hitPoint = ball.x - (bot.x + bot.width/2);
+                    hitPoint = hitPoint / (bot.width/2);
+                    ball.vx = hitPoint * 5;
+                    ball.y = bot.y + bot.height + ball.radius;
+                }
+
+                // Conditions de victoire / défaite
+                if(ball.y > canvas.height) { // Le joueur a raté
+                    bot.score++;
+                    resetBall();
+                } else if(ball.y < 0) { // Le bot a raté
+                    player.score++;
+                    resetBall();
+                }
+            }
+        }
+
+        // Fonction pour dessiner les éléments sur le canvas
+        function drawRect(x, y, w, h, color) {
+            ctx.fillStyle = color;
+            ctx.fillRect(x, y, w, h);
+        }
+
+        function drawArc(x, y, r, color) {
+            ctx.fillStyle = color;
+            ctx.beginPath();
+            ctx.arc(x, y, r, 0, Math.PI*2, false);
+            ctx.closePath();
+            ctx.fill();
+        }
+
+        function drawText(text, x, y, color, size="20px") {
+            ctx.fillStyle = color;
+            ctx.font = size + " 'Share Tech Mono'";
+            ctx.fillText(text, x, y);
+        }
+
+        function drawGame() {
+            // Effacer l'écran (fond de la table)
+            drawRect(0, 0, canvas.width, canvas.height, "#1a6b3c");
+
+            // Filet central
+            ctx.beginPath();
+            ctx.setLineDash([5, 10]);
+            ctx.moveTo(0, canvas.height/2);
+            ctx.lineTo(canvas.width, canvas.height/2);
+            ctx.strokeStyle = "rgba(255,255,255,0.5)";
+            ctx.stroke();
+            ctx.setLineDash([]); // Reset des pointillés
+
+            // Scores
+            drawText(bot.score, 20, canvas.height/2 - 20, "rgba(255,255,255,0.3)", "40px");
+            drawText(player.score, 20, canvas.height/2 + 50, "rgba(255,255,255,0.3)", "40px");
+
+            // Raquettes
+            drawRect(player.x, player.y, player.width, player.height, player.color);
+            drawRect(bot.x, bot.y, bot.width, bot.height, bot.color);
+
+            // Balle
+            drawArc(ball.x, ball.y, ball.radius, ball.color);
+
+            // Message de départ
+            if(gameState === 'START') {
+                ctx.fillStyle = "rgba(0,0,0,0.5)";
+                ctx.fillRect(0, canvas.height/2 - 40, canvas.width, 80);
+                drawText("Appuyez sur ESPACE", canvas.width/2 - 90, canvas.height/2 + 5, "white", "18px");
+            }
+        }
+
+        // Boucle d'animation (s'exécute environ 60 fois par seconde)
+        function loop() {
+            updateGame();
+            drawGame();
+            requestAnimationFrame(loop);
+        }
+        
+        // Lancer la boucle du jeu au chargement
+        loop();
+
     </script>
 </body>
 </html>
