@@ -111,40 +111,40 @@
             align-items: center;
             z-index: 20;
             background: rgba(0, 0, 0, 0.85);
-            padding: 20px 30px 30px 30px;
+            padding: 30px;
             border-radius: 20px;
             box-shadow: 0 30px 60px rgba(0,0,0,0.9);
             border: 1px solid #333;
-            max-width: 95vw;
         }
 
         .game-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
             width: 100%;
-            margin-bottom: 15px;
+            text-align: center;
+            margin-bottom: 20px;
         }
 
         .game-title {
-            font-size: 1.2rem;
+            font-size: 1.5rem;
             color: #ff9800;
             margin: 0;
             text-transform: uppercase;
             letter-spacing: 2px;
         }
 
-        /* Bouton retour placé en haut à droite */
-        .btn-retour { 
-            background-color: #d32f2f; 
-            border-bottom: 4px solid #9a0007; 
-            font-size: 0.85rem; 
-            padding: 8px 15px; 
+        /* Disposition du bouton et de la table */
+        .game-body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 30px; /* Espace entre le bouton et la table */
         }
-        .btn-retour:hover { 
-            transform: translateY(2px); 
-            border-bottom: 2px solid #9a0007; 
-            background-color: #e53935;
+
+        /* Panneaux latéraux pour équilibrer la table au centre */
+        .side-panel {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 180px; 
         }
 
         canvas {
@@ -152,229 +152,27 @@
             border-radius: 8px;
             box-shadow: inset 0 0 20px rgba(0,0,0,0.8), 0 10px 20px rgba(0,0,0,0.5);
             cursor: none;
-            max-height: 65vh; /* S'adapte à la hauteur des petits écrans */
-            max-width: 100%;
         }
 
-    </style>
-</head>
-<body>
-
-    <!-- Décors d'arrière-plan -->
-    <div class="bg-lines"></div>
-    <div class="net"></div>
-
-    <!-- ÉCRAN PRINCIPAL -->
-    <div class="content-wrapper" id="content-wrapper">
-        <div class="scoreboard">
-            <h1>Prochain match à 16h30</h1>
-            <div class="countdown">
-                <div class="time-box"><span class="number" id="hours">00</span><span class="label">Heures</span></div>
-                <div class="time-box"><span class="number" id="minutes">00</span><span class="label">Minutes</span></div>
-                <div class="time-box"><span class="number" id="seconds">00</span><span class="label">Secondes</span></div>
-            </div>
-        </div>
-
-        <div class="question-section" id="interactive-section">
-            <h2 id="question-text">Est-ce que tu as hâte ?</h2>
-            <div class="buttons-container" id="buttons-container">
-                <button id="btn-oui" class="btn btn-oui">Oui</button>
-                <button id="btn-non" class="btn btn-non">Non</button>
-            </div>
-            <button id="btn-train" class="btn btn-train">Je veux m'entraîner</button>
-        </div>
-    </div>
-
-    <!-- ÉCRAN DU JEU -->
-    <div id="game-wrapper">
-        <!-- L'en-tête du jeu avec le bouton pour quitter -->
-        <div class="game-header">
-            <h2 class="game-title">Mode Entraînement</h2>
-            <button id="btn-retour" class="btn btn-retour">Quitter ✖</button>
-        </div>
-        <canvas id="pongCanvas" width="440" height="560"></canvas>
-    </div>
-
-    <script>
-        // ==========================================
-        // 1. COMPTE À REBOURS
-        // ==========================================
-        function updateCountdown() {
-            const now = new Date();
-            let target = new Date();
-            target.setHours(16, 30, 0, 0);
-            if (now > target) target.setDate(target.getDate() + 1);
-
-            const diff = target - now;
-            const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-            const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-            const s = Math.floor((diff % (1000 * 60)) / 1000);
-
-            document.getElementById('hours').innerText = h.toString().padStart(2, 'Tu as tout à fait raison ! Dans la version précédente, le bouton était tout en bas et pouvait facilement être coupé ou invisible si ton écran n'était pas très grand. 
-
-Pour corriger ça et rendre l'interface beaucoup plus ergonomique, j'ai déplacé ce bouton d'arrêt tout en haut de l'interface de jeu. C'est maintenant un joli bouton rouge **"QUITTER ✖"** situé en haut à droite, au même niveau que le titre "Mode Entraînement". Ainsi, il sera toujours visible, quelle que soit la taille de l'écran.
-
-Voici le code complet mis à jour (tu peux tout copier et remplacer dans ton fichier `index.html`) :
-
-```html
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Compte à rebours Ping Pong</title>
-    <link href="[https://fonts.googleapis.com/css2?family=Montserrat:wght@600;800&family=Share+Tech+Mono&display=swap](https://fonts.googleapis.com/css2?family=Montserrat:wght@600;800&family=Share+Tech+Mono&display=swap)" rel="stylesheet">
-    <style>
-        /* --- STYLES GLOBAUX --- */
-        body {
-            margin: 0;
-            padding: 0;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            background: radial-gradient(circle, #278148 0%, #154526 100%);
-            font-family: 'Montserrat', sans-serif;
-            color: white;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .bg-lines::before, .bg-lines::after {
-            content: '';
-            position: absolute;
-            background-color: rgba(255, 255, 255, 0.8);
-            box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
-            z-index: 0;
-        }
-        .bg-lines::before { top: 50%; left: 0; width: 100%; height: 6px; }
-        .bg-lines::after { top: 0; left: 50%; width: 6px; height: 100%; }
-
-        .net {
-            position: absolute;
-            top: 50%; left: 0; width: 100%; height: 25px;
-            background: repeating-linear-gradient(45deg, transparent, transparent 4px, rgba(255, 255, 255, 0.3) 4px, rgba(255, 255, 255, 0.3) 6px),
-                        repeating-linear-gradient(-45deg, transparent, transparent 4px, rgba(255, 255, 255, 0.3) 4px, rgba(255, 255, 255, 0.3) 6px);
-            border-top: 4px solid white;
-            transform: translateY(-50%);
-            z-index: 1;
-        }
-
-        /* --- CONTENEUR PRINCIPAL --- */
-        .content-wrapper {
-            z-index: 10;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 30px;
+        .btn-retour { 
+            background-color: #555; 
+            border-bottom: 5px solid #333; 
+            font-size: 0.9rem; 
+            padding: 15px 20px; 
             width: 100%;
-            max-width: 600px;
-            padding: 20px;
-        }
-
-        .scoreboard {
-            background: linear-gradient(145deg, #1a1a1a, #2a2a2a);
-            border: 8px solid #d32f2f;
-            border-radius: 15px;
-            padding: 30px 40px;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.7);
             text-align: center;
-            width: 100%;
-            box-sizing: border-box;
         }
+        .btn-retour:hover { transform: translateY(3px); border-bottom: 2px solid #333; }
 
-        h1 { margin-top: 0; font-size: 1.8rem; text-transform: uppercase; letter-spacing: 1px; }
-
-        .countdown { display: flex; gap: 15px; justify-content: center; margin-top: 20px; }
-        .time-box { display: flex; flex-direction: column; align-items: center; }
-
-        .number {
-            font-family: 'Share Tech Mono', monospace;
-            font-size: 4.5rem; background-color: #050505; padding: 15px 20px;
-            border-radius: 8px; color: #ff9800; min-width: 80px;
-            border: 1px solid #333; text-shadow: 0 0 10px rgba(255, 152, 0, 0.5);
-        }
-        .label { margin-top: 8px; font-size: 0.85rem; text-transform: uppercase; color: #888; font-weight: 800; }
-
-        .question-section {
-            background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(5px);
-            padding: 25px; border-radius: 15px; text-align: center;
-            width: 100%; box-sizing: border-box; border: 1px solid rgba(255,255,255,0.1);
-            box-shadow: 0 15px 30px rgba(0,0,0,0.5);
-        }
-
-        .buttons-container { display: flex; justify-content: center; gap: 20px; position: relative; margin-bottom: 25px; }
-
-        .btn {
-            font-family: 'Montserrat', sans-serif; font-size: 1.2rem; font-weight: 800;
-            padding: 15px 40px; border: none; border-radius: 50px; cursor: pointer;
-            text-transform: uppercase; color: white; position: relative;
-        }
-        .btn-oui { background-color: #d32f2f; border-bottom: 5px solid #9a0007; transition: transform 0.2s, background-color 0.2s; }
-        .btn-oui:hover { transform: translateY(3px); border-bottom: 2px solid #9a0007; background-color: #e53935; }
-        
-        .btn-non { background-color: #212121; border-bottom: 5px solid #000000; transition: transform 0.1s linear; z-index: 100; }
-        
-        .btn-train { background-color: #1976D2; border-bottom: 5px solid #115293; font-size: 1rem; padding: 12px 30px; transition: 0.2s; }
-        .btn-train:hover { transform: translateY(3px); border-bottom: 2px solid #115293; background-color: #2196F3; }
-
-        .success-message { font-size: 1.4rem; color: #4caf50; font-weight: 800; }
-
-        /* --- CONTENEUR DU MINI JEU --- */
-        #game-wrapper {
-            display: none; 
-            flex-direction: column;
-            align-items: center;
-            z-index: 20;
-            background: rgba(0, 0, 0, 0.85);
-            padding: 25px;
-            border-radius: 20px;
-            box-shadow: 0 30px 60px rgba(0,0,0,0.9);
-            border: 1px solid #333;
-        }
-
-        .game-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            width: 100%;
-            margin-bottom: 20px;
-        }
-
-        .game-title {
-            font-size: 1.3rem;
-            color: #ff9800;
-            margin: 0;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        /* Nouveau design pour le bouton Quitter */
-        .btn-close {
-            background-color: #d32f2f;
-            color: white;
-            border: none;
-            padding: 8px 15px;
-            border-radius: 8px;
-            font-family: 'Montserrat', sans-serif;
-            font-weight: 800;
-            font-size: 0.9rem;
-            cursor: pointer;
-            text-transform: uppercase;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
-            transition: transform 0.1s, background-color 0.2s;
-        }
-        .btn-close:hover {
-            background-color: #ff5252;
-            transform: scale(1.05);
-        }
-
-        canvas {
-            background-color: #2c2c2c;
-            border-radius: 8px;
-            box-shadow: inset 0 0 20px rgba(0,0,0,0.8), 0 10px 20px rgba(0,0,0,0.5);
-            cursor: none;
+        /* Si l'écran est trop petit, on passe le bouton en dessous */
+        @media (max-width: 900px) {
+            .game-body {
+                flex-direction: column-reverse; /* Le bouton passe en dessous du canvas */
+                gap: 20px;
+            }
+            .side-panel {
+                width: auto;
+            }
         }
 
     </style>
@@ -410,10 +208,19 @@ Voici le code complet mis à jour (tu peux tout copier et remplacer dans ton fic
     <div id="game-wrapper">
         <div class="game-header">
             <h2 class="game-title">Mode Entraînement</h2>
-            <!-- Le bouton est maintenant bien visible en haut à droite -->
-            <button id="btn-retour" class="btn-close">Quitter ✖</button>
         </div>
-        <canvas id="pongCanvas" width="440" height="560"></canvas>
+        
+        <!-- Nouveau layout : Bouton à gauche, table au centre -->
+        <div class="game-body">
+            <div class="side-panel">
+                <button id="btn-retour" class="btn btn-retour">Quitter le jeu</button>
+            </div>
+            
+            <canvas id="pongCanvas" width="440" height="560"></canvas>
+            
+            <!-- Panneau vide à droite pour que la table reste parfaitement centrée par rapport au titre -->
+            <div class="side-panel"></div>
+        </div>
     </div>
 
     <script>
@@ -506,6 +313,7 @@ Voici le code complet mis à jour (tu peux tout copier et remplacer dans ton fic
 
         let gameState = 'START';
 
+        // Contrôle
         canvas.addEventListener('mousemove', (e) => {
             let rect = canvas.getBoundingClientRect();
             let scaleX = canvas.width / rect.width;
@@ -594,9 +402,9 @@ Voici le code complet mis à jour (tu peux tout copier et remplacer dans ton fic
 
             ctx.fillStyle = "#a66e3d";
             if (isPlayer) {
-                ctx.fillRect(centerX - 8, centerY, 16, 35);
+                ctx.fillRect(centerX - 8, centerY, 16, 35); 
             } else {
-                ctx.fillRect(centerX - 8, centerY - 35, 16, 35);
+                ctx.fillRect(centerX - 8, centerY - 35, 16, 35); 
             }
 
             ctx.fillStyle = paddle.color;
@@ -646,10 +454,8 @@ Voici le code complet mis à jour (tu peux tout copier et remplacer dans ton fic
             if(gameState === 'PLAYING' || gameState === 'START') {
                 ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
                 ctx.beginPath(); ctx.arc(ball.x + 6, ball.y + 6, ball.radius, 0, Math.PI*2); ctx.fill();
-                
                 ctx.fillStyle = ball.color;
                 ctx.beginPath(); ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI*2); ctx.fill();
-                
                 ctx.fillStyle = "rgba(255,255,255,0.6)";
                 ctx.beginPath(); ctx.arc(ball.x - 2, ball.y - 2, ball.radius/2.5, 0, Math.PI*2); ctx.fill();
             }
