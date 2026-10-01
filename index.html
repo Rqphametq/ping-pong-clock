@@ -104,14 +104,231 @@
 
         .success-message { font-size: 1.4rem; color: #4caf50; font-weight: 800; }
 
-        /* --- CONTENEUR DU MINI JEU AMÉLIORÉ --- */
+        /* --- CONTENEUR DU MINI JEU --- */
         #game-wrapper {
             display: none; 
             flex-direction: column;
             align-items: center;
             z-index: 20;
             background: rgba(0, 0, 0, 0.85);
-            padding: 30px;
+            padding: 20px 30px 30px 30px;
+            border-radius: 20px;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.9);
+            border: 1px solid #333;
+            max-width: 95vw;
+        }
+
+        .game-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            margin-bottom: 15px;
+        }
+
+        .game-title {
+            font-size: 1.2rem;
+            color: #ff9800;
+            margin: 0;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        /* Bouton retour placé en haut à droite */
+        .btn-retour { 
+            background-color: #d32f2f; 
+            border-bottom: 4px solid #9a0007; 
+            font-size: 0.85rem; 
+            padding: 8px 15px; 
+        }
+        .btn-retour:hover { 
+            transform: translateY(2px); 
+            border-bottom: 2px solid #9a0007; 
+            background-color: #e53935;
+        }
+
+        canvas {
+            background-color: #2c2c2c; 
+            border-radius: 8px;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.8), 0 10px 20px rgba(0,0,0,0.5);
+            cursor: none;
+            max-height: 65vh; /* S'adapte à la hauteur des petits écrans */
+            max-width: 100%;
+        }
+
+    </style>
+</head>
+<body>
+
+    <!-- Décors d'arrière-plan -->
+    <div class="bg-lines"></div>
+    <div class="net"></div>
+
+    <!-- ÉCRAN PRINCIPAL -->
+    <div class="content-wrapper" id="content-wrapper">
+        <div class="scoreboard">
+            <h1>Prochain match à 16h30</h1>
+            <div class="countdown">
+                <div class="time-box"><span class="number" id="hours">00</span><span class="label">Heures</span></div>
+                <div class="time-box"><span class="number" id="minutes">00</span><span class="label">Minutes</span></div>
+                <div class="time-box"><span class="number" id="seconds">00</span><span class="label">Secondes</span></div>
+            </div>
+        </div>
+
+        <div class="question-section" id="interactive-section">
+            <h2 id="question-text">Est-ce que tu as hâte ?</h2>
+            <div class="buttons-container" id="buttons-container">
+                <button id="btn-oui" class="btn btn-oui">Oui</button>
+                <button id="btn-non" class="btn btn-non">Non</button>
+            </div>
+            <button id="btn-train" class="btn btn-train">Je veux m'entraîner</button>
+        </div>
+    </div>
+
+    <!-- ÉCRAN DU JEU -->
+    <div id="game-wrapper">
+        <!-- L'en-tête du jeu avec le bouton pour quitter -->
+        <div class="game-header">
+            <h2 class="game-title">Mode Entraînement</h2>
+            <button id="btn-retour" class="btn btn-retour">Quitter ✖</button>
+        </div>
+        <canvas id="pongCanvas" width="440" height="560"></canvas>
+    </div>
+
+    <script>
+        // ==========================================
+        // 1. COMPTE À REBOURS
+        // ==========================================
+        function updateCountdown() {
+            const now = new Date();
+            let target = new Date();
+            target.setHours(16, 30, 0, 0);
+            if (now > target) target.setDate(target.getDate() + 1);
+
+            const diff = target - now;
+            const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            const s = Math.floor((diff % (1000 * 60)) / 1000);
+
+            document.getElementById('hours').innerText = h.toString().padStart(2, 'Tu as tout à fait raison ! Dans la version précédente, le bouton était tout en bas et pouvait facilement être coupé ou invisible si ton écran n'était pas très grand. 
+
+Pour corriger ça et rendre l'interface beaucoup plus ergonomique, j'ai déplacé ce bouton d'arrêt tout en haut de l'interface de jeu. C'est maintenant un joli bouton rouge **"QUITTER ✖"** situé en haut à droite, au même niveau que le titre "Mode Entraînement". Ainsi, il sera toujours visible, quelle que soit la taille de l'écran.
+
+Voici le code complet mis à jour (tu peux tout copier et remplacer dans ton fichier `index.html`) :
+
+```html
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Compte à rebours Ping Pong</title>
+    <link href="[https://fonts.googleapis.com/css2?family=Montserrat:wght@600;800&family=Share+Tech+Mono&display=swap](https://fonts.googleapis.com/css2?family=Montserrat:wght@600;800&family=Share+Tech+Mono&display=swap)" rel="stylesheet">
+    <style>
+        /* --- STYLES GLOBAUX --- */
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: radial-gradient(circle, #278148 0%, #154526 100%);
+            font-family: 'Montserrat', sans-serif;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .bg-lines::before, .bg-lines::after {
+            content: '';
+            position: absolute;
+            background-color: rgba(255, 255, 255, 0.8);
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+            z-index: 0;
+        }
+        .bg-lines::before { top: 50%; left: 0; width: 100%; height: 6px; }
+        .bg-lines::after { top: 0; left: 50%; width: 6px; height: 100%; }
+
+        .net {
+            position: absolute;
+            top: 50%; left: 0; width: 100%; height: 25px;
+            background: repeating-linear-gradient(45deg, transparent, transparent 4px, rgba(255, 255, 255, 0.3) 4px, rgba(255, 255, 255, 0.3) 6px),
+                        repeating-linear-gradient(-45deg, transparent, transparent 4px, rgba(255, 255, 255, 0.3) 4px, rgba(255, 255, 255, 0.3) 6px);
+            border-top: 4px solid white;
+            transform: translateY(-50%);
+            z-index: 1;
+        }
+
+        /* --- CONTENEUR PRINCIPAL --- */
+        .content-wrapper {
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 30px;
+            width: 100%;
+            max-width: 600px;
+            padding: 20px;
+        }
+
+        .scoreboard {
+            background: linear-gradient(145deg, #1a1a1a, #2a2a2a);
+            border: 8px solid #d32f2f;
+            border-radius: 15px;
+            padding: 30px 40px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.7);
+            text-align: center;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        h1 { margin-top: 0; font-size: 1.8rem; text-transform: uppercase; letter-spacing: 1px; }
+
+        .countdown { display: flex; gap: 15px; justify-content: center; margin-top: 20px; }
+        .time-box { display: flex; flex-direction: column; align-items: center; }
+
+        .number {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 4.5rem; background-color: #050505; padding: 15px 20px;
+            border-radius: 8px; color: #ff9800; min-width: 80px;
+            border: 1px solid #333; text-shadow: 0 0 10px rgba(255, 152, 0, 0.5);
+        }
+        .label { margin-top: 8px; font-size: 0.85rem; text-transform: uppercase; color: #888; font-weight: 800; }
+
+        .question-section {
+            background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(5px);
+            padding: 25px; border-radius: 15px; text-align: center;
+            width: 100%; box-sizing: border-box; border: 1px solid rgba(255,255,255,0.1);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.5);
+        }
+
+        .buttons-container { display: flex; justify-content: center; gap: 20px; position: relative; margin-bottom: 25px; }
+
+        .btn {
+            font-family: 'Montserrat', sans-serif; font-size: 1.2rem; font-weight: 800;
+            padding: 15px 40px; border: none; border-radius: 50px; cursor: pointer;
+            text-transform: uppercase; color: white; position: relative;
+        }
+        .btn-oui { background-color: #d32f2f; border-bottom: 5px solid #9a0007; transition: transform 0.2s, background-color 0.2s; }
+        .btn-oui:hover { transform: translateY(3px); border-bottom: 2px solid #9a0007; background-color: #e53935; }
+        
+        .btn-non { background-color: #212121; border-bottom: 5px solid #000000; transition: transform 0.1s linear; z-index: 100; }
+        
+        .btn-train { background-color: #1976D2; border-bottom: 5px solid #115293; font-size: 1rem; padding: 12px 30px; transition: 0.2s; }
+        .btn-train:hover { transform: translateY(3px); border-bottom: 2px solid #115293; background-color: #2196F3; }
+
+        .success-message { font-size: 1.4rem; color: #4caf50; font-weight: 800; }
+
+        /* --- CONTENEUR DU MINI JEU --- */
+        #game-wrapper {
+            display: none; 
+            flex-direction: column;
+            align-items: center;
+            z-index: 20;
+            background: rgba(0, 0, 0, 0.85);
+            padding: 25px;
             border-radius: 20px;
             box-shadow: 0 30px 60px rgba(0,0,0,0.9);
             border: 1px solid #333;
@@ -126,23 +343,39 @@
         }
 
         .game-title {
-            font-size: 1.5rem;
+            font-size: 1.3rem;
             color: #ff9800;
             margin: 0;
             text-transform: uppercase;
-            letter-spacing: 2px;
+            letter-spacing: 1px;
+        }
+
+        /* Nouveau design pour le bouton Quitter */
+        .btn-close {
+            background-color: #d32f2f;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 8px;
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 800;
+            font-size: 0.9rem;
+            cursor: pointer;
+            text-transform: uppercase;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            transition: transform 0.1s, background-color 0.2s;
+        }
+        .btn-close:hover {
+            background-color: #ff5252;
+            transform: scale(1.05);
         }
 
         canvas {
-            background-color: #2c2c2c; /* Contour de la table (sol) */
+            background-color: #2c2c2c;
             border-radius: 8px;
             box-shadow: inset 0 0 20px rgba(0,0,0,0.8), 0 10px 20px rgba(0,0,0,0.5);
             cursor: none;
-            margin-bottom: 25px;
         }
-
-        .btn-retour { background-color: #555; border-bottom: 5px solid #333; font-size: 1rem; padding: 10px 25px; }
-        .btn-retour:hover { transform: translateY(3px); border-bottom: 2px solid #333; }
 
     </style>
 </head>
@@ -177,10 +410,10 @@
     <div id="game-wrapper">
         <div class="game-header">
             <h2 class="game-title">Mode Entraînement</h2>
+            <!-- Le bouton est maintenant bien visible en haut à droite -->
+            <button id="btn-retour" class="btn-close">Quitter ✖</button>
         </div>
-        <!-- Le canvas : taille légèrement agrandie pour la nouvelle table -->
         <canvas id="pongCanvas" width="440" height="560"></canvas>
-        <button id="btn-retour" class="btn btn-retour">Quitter la table</button>
     </div>
 
     <script>
@@ -241,7 +474,7 @@
         });
 
         // ==========================================
-        // 3. MOTEUR DU JEU PING PONG AMÉLIORÉ
+        // 3. MOTEUR DU JEU PING PONG
         // ==========================================
         const contentWrapper = document.getElementById('content-wrapper');
         const gameWrapper = document.getElementById('game-wrapper');
@@ -267,23 +500,20 @@
         const canvas = document.getElementById("pongCanvas");
         const ctx = canvas.getContext("2d");
 
-        // Les objets ont été ajustés pour la nouvelle raquette plus épaisse (hauteur 24)
         const player = { x: canvas.width/2 - 40, y: canvas.height - 45, width: 70, height: 24, color: "#d32f2f", score: 0 };
         const bot = { x: canvas.width/2 - 40, y: 25, width: 70, height: 24, color: "#212121", score: 0 };
         const ball = { x: canvas.width/2, y: canvas.height/2, radius: 8, vx: 0, vy: 0, color: "#ffb74d" };
 
         let gameState = 'START';
 
-        // Contrôle
         canvas.addEventListener('mousemove', (e) => {
             let rect = canvas.getBoundingClientRect();
-            // L'échelle pour corriger si le canvas est redimensionné par le CSS
             let scaleX = canvas.width / rect.width;
             let mouseX = (e.clientX - rect.left) * scaleX;
             
             player.x = mouseX - player.width/2;
             
-            if(player.x < 15) player.x = 15; // Bloqué par les bords de la table
+            if(player.x < 15) player.x = 15;
             if(player.x + player.width > canvas.width - 15) player.x = canvas.width - 15 - player.width;
         });
 
@@ -310,12 +540,10 @@
                 ball.x += ball.vx;
                 ball.y += ball.vy;
 
-                // Rebond sur les bords (la table est entre 15px et width-15px)
                 if(ball.x - ball.radius < 15 || ball.x + ball.radius > canvas.width - 15) {
                     ball.vx = -ball.vx;
                 }
 
-                // IA du Bot
                 let botCenter = bot.x + bot.width/2;
                 let botSpeed = 4.5; 
                 if(botCenter < ball.x - 10) bot.x += botSpeed;
@@ -324,7 +552,6 @@
                 if(bot.x < 15) bot.x = 15;
                 if(bot.x + bot.width > canvas.width - 15) bot.x = canvas.width - 15 - bot.width;
 
-                // Collision Joueur
                 if(ball.y + ball.radius > player.y && ball.y - ball.radius < player.y + player.height && ball.x > player.x && ball.x < player.x + player.width) {
                     ball.vy = -ball.vy;
                     let hitPoint = ball.x - (player.x + player.width/2);
@@ -333,7 +560,6 @@
                     ball.y = player.y - ball.radius; 
                 }
 
-                // Collision Bot
                 if(ball.y - ball.radius < bot.y + bot.height && ball.y + ball.radius > bot.y && ball.x > bot.x && ball.x < bot.x + bot.width) {
                     ball.vy = -ball.vy;
                     let hitPoint = ball.x - (bot.x + bot.width/2);
@@ -342,7 +568,6 @@
                     ball.y = bot.y + bot.height + ball.radius;
                 }
 
-                // Victoire / Défaite (quand la balle sort du sol)
                 if(ball.y > canvas.height) { 
                     bot.score++;
                     resetBall();
@@ -353,38 +578,32 @@
             }
         }
 
-        // --- FONCTIONS DE DESSIN AMÉLIORÉES ---
         function drawRect(x, y, w, h, color) {
             ctx.fillStyle = color;
             ctx.fillRect(x, y, w, h);
         }
 
-        // Dessine une vraie raquette
         function drawPaddle(paddle, isPlayer) {
             const centerX = paddle.x + paddle.width / 2;
             const centerY = paddle.y + paddle.height / 2;
 
-            // Ombre portée de la raquette
             ctx.fillStyle = "rgba(0, 0, 0, 0.4)";
             ctx.beginPath();
             ctx.ellipse(centerX + 8, centerY + 8, paddle.width/2, paddle.height/2, 0, 0, Math.PI*2);
             ctx.fill();
 
-            // Manche en bois
             ctx.fillStyle = "#a66e3d";
             if (isPlayer) {
-                ctx.fillRect(centerX - 8, centerY, 16, 35); // Manche vers le bas
+                ctx.fillRect(centerX - 8, centerY, 16, 35);
             } else {
-                ctx.fillRect(centerX - 8, centerY - 35, 16, 35); // Manche vers le haut
+                ctx.fillRect(centerX - 8, centerY - 35, 16, 35);
             }
 
-            // Revêtement (face de la raquette)
             ctx.fillStyle = paddle.color;
             ctx.beginPath();
             ctx.ellipse(centerX, centerY, paddle.width/2, paddle.height/2, 0, 0, Math.PI*2);
             ctx.fill();
 
-            // Reflet pour donner du volume
             ctx.strokeStyle = "rgba(255,255,255,0.2)";
             ctx.lineWidth = 3;
             ctx.beginPath();
@@ -393,58 +612,48 @@
         }
 
         function drawGame() {
-            // Effacer et dessiner le contour bois de la table
             drawRect(0, 0, canvas.width, canvas.height, "#2c2c2c");
 
-            // La surface verte de la table
             const tableMarge = 15;
             drawRect(tableMarge, tableMarge, canvas.width - tableMarge*2, canvas.height - tableMarge*2, "#1a6b3c");
 
-            // Ligne blanche autour
             ctx.strokeStyle = "white";
             ctx.lineWidth = 4;
             ctx.strokeRect(tableMarge + 2, tableMarge + 2, canvas.width - (tableMarge*2) - 4, canvas.height - (tableMarge*2) - 4);
 
-            // Ligne blanche centrale
             ctx.beginPath();
             ctx.moveTo(canvas.width / 2, tableMarge);
             ctx.lineTo(canvas.width / 2, canvas.height - tableMarge);
             ctx.lineWidth = 2;
             ctx.stroke();
 
-            // Les scores en gros et transparents au fond
             ctx.fillStyle = "rgba(255, 255, 255, 0.15)";
             ctx.font = "bold 100px 'Share Tech Mono'";
             ctx.textAlign = "center";
             ctx.fillText(bot.score, canvas.width/2, canvas.height/2 - 60);
             ctx.fillText(player.score, canvas.width/2, canvas.height/2 + 130);
 
-            // Le filet réaliste
             const netY = canvas.height/2;
-            drawRect(tableMarge - 5, netY + 2, canvas.width - (tableMarge*2) + 10, 8, "rgba(0,0,0,0.3)"); // Ombre
-            drawRect(tableMarge - 5, netY - 4, canvas.width - (tableMarge*2) + 10, 8, "#333"); // Grillage
-            drawRect(tableMarge - 5, netY - 4, canvas.width - (tableMarge*2) + 10, 3, "white"); // Bande blanche haut
-            drawRect(tableMarge - 5, netY - 8, 8, 16, "#111"); // Poteau gauche
-            drawRect(canvas.width - tableMarge - 3, netY - 8, 8, 16, "#111"); // Poteau droit
+            drawRect(tableMarge - 5, netY + 2, canvas.width - (tableMarge*2) + 10, 8, "rgba(0,0,0,0.3)"); 
+            drawRect(tableMarge - 5, netY - 4, canvas.width - (tableMarge*2) + 10, 8, "#333"); 
+            drawRect(tableMarge - 5, netY - 4, canvas.width - (tableMarge*2) + 10, 3, "white"); 
+            drawRect(tableMarge - 5, netY - 8, 8, 16, "#111"); 
+            drawRect(canvas.width - tableMarge - 3, netY - 8, 8, 16, "#111"); 
 
-            // Dessin des raquettes
             drawPaddle(player, true);
             drawPaddle(bot, false);
 
-            // Dessin de la balle
             if(gameState === 'PLAYING' || gameState === 'START') {
-                // Ombre de la balle
                 ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
                 ctx.beginPath(); ctx.arc(ball.x + 6, ball.y + 6, ball.radius, 0, Math.PI*2); ctx.fill();
-                // La balle
+                
                 ctx.fillStyle = ball.color;
                 ctx.beginPath(); ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI*2); ctx.fill();
-                // Petit reflet sur la balle
+                
                 ctx.fillStyle = "rgba(255,255,255,0.6)";
                 ctx.beginPath(); ctx.arc(ball.x - 2, ball.y - 2, ball.radius/2.5, 0, Math.PI*2); ctx.fill();
             }
 
-            // Message pour démarrer
             if(gameState === 'START') {
                 ctx.fillStyle = "rgba(0,0,0,0.7)";
                 ctx.fillRect(0, canvas.height/2 - 25, canvas.width, 50);
